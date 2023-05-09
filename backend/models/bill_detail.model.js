@@ -10,18 +10,29 @@ const BillDetailsModel = sequelize.define(
         quantity:{
             type: DataTypes.INTEGER,
             allowNull:false
+        },
+        price:{
+            type: DataTypes.INTEGER,
+            allowNull:false
+        },
+        material_id: {
+            type: DataTypes.INTEGER,
+            references: {
+                model: MaterialModel,
+                key: 'id',
+            },
+            allowNull: false
+        },
+        bill_id:{
+            type: DataTypes.INTEGER,
+            references: {
+                model: BillModel,
+                key: 'id',
+            },
         }
     },
     { initialAutoIncrement: 1000, timestamps: true, paranoid: true }
 );
-MaterialModel.belongsToMany(BillModel, {
-    through: BillDetailsModel, 
-    foreignKey: "material_id"
-});
-BillModel.belongsToMany(MaterialModel, {
-    through: BillDetailsModel, 
-    foreignKey: "bill_id"
-})
 
 
 module.exports = BillDetailsModel;

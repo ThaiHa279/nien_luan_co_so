@@ -15,6 +15,9 @@ const MaterialModel = sequelize.define(
             type: DataTypes.TEXT, 
             allowNull:false
         }, 
+        code: {
+            type: DataTypes.TEXT, 
+        },
         expiry: {
             type: DataTypes.INTEGER,
             defaultValue: 0
@@ -23,6 +26,9 @@ const MaterialModel = sequelize.define(
             type: DataTypes.INTEGER,
             allowNull:false
         },
+        description: {
+            type: DataTypes.TEXT,
+        }
     },
     { initialAutoIncrement: 1000, timestamps: true, paranoid: true }
 );

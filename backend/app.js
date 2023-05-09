@@ -1,3 +1,5 @@
+//sk_test_51MrXePK68tOaceDgiOG8RuBxyM4gBSS3lbppIOe00cTKVRlSqrNmXxhtcA6buVmMTFNNYh6u513O4K7afmHneJaO00xWaOYoJW
+//price_1MrXhwK68tOaceDgTe4V0giE
 const express = require('express');
 const cors = require("cors");
 const config = require("~/config");
@@ -8,9 +10,10 @@ const Connect = require('connect-pg-simple')
 const session = require('express-session')
 const AdminJSSequelize = require('@adminjs/sequelize')
 const sequelize = require("~/services/sequelize.service")
-
 const PORT = 3000
-
+const stripe = require('stripe')("sk_test_51MrXePK68tOaceDgiOG8RuBxyM4gBSS3lbppIOe00cTKVRlSqrNmXxhtcA6buVmMTFNNYh6u513O4K7afmHneJaO00xWaOYoJW")
+const material = require('~/models/material.model')
+const material_details = require('~/models/material_detail.model')
 const DEFAULT_ADMIN = {
   email: 'admin@example.com',
   password: 'password',
@@ -36,6 +39,21 @@ app.use(
 app.use("/api/v1", require("~/routes"));
 const admin = new AdminJS({
 	databases: [sequelize],
+  resources: [{
+    resource: material,
+    options: {
+      properties: {
+        description: {
+          isVisible: {
+            edit: true,
+            show: true,
+            list: false,
+            filter: false,
+          },
+        },
+      },
+    },
+  },],
 })
 
 const ConnectSession = Connect(session)
@@ -51,9 +69,9 @@ const sessionStore = new ConnectSession({
 const adminRouter = AdminJSExpress.buildAuthenticatedRouter(
   admin,
   {
-	authenticate,
-	cookieName: 'adminjs',
-	cookiePassword: 'sessionsecret',
+    authenticate,
+    cookieName: 'adminjs',
+    cookiePassword: 'sessionsecret',
   },
   null,
   {
@@ -68,9 +86,36 @@ const adminRouter = AdminJSExpress.buildAuthenticatedRouter(
 	name: 'adminjs',
   }
 )
+
+app.post("/checkout", async (req, res) => {
+    console.log(req.body);
+    const items = req.body.items;
+    let lineItems = [];
+    items.forEach((item)=> {
+        lineItems.push(
+            {
+                price: item.code,
+                quantity: item.quantity
+            }
+        )
+    });
+
+    const session = await stripe.checkout.sessions.create({
+        line_items: lineItems,
+        mode: 'payment',
+        success_url: "http://localhost:3001/success",
+        cancel_url: "http://localhost:3001/cancel"
+    });
+
+    res.send(JSON.stringify({
+        url: session.url
+    }));
+});
 app.use(admin.options.rootPath, adminRouter)
 app.listen(PORT, () => {
     console.log(`AdminJS started on http://localhost:${PORT}${admin.options.rootPath}`)
 })
+
+
 
 module.exports = app;

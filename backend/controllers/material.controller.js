@@ -1,7 +1,7 @@
 const MaterialModel = require('~/models/material.model');
 const MaterialTypeModel = require('~/models/material_type.model');
 const MaterialDetailsModel = require('~/models/material_detail.model');
-const { where } = require('sequelize');
+const sequelize = require("~/services/sequelize.service");
 
 class MaterialController {
     async createMaterialType(req, res) {
@@ -68,10 +68,11 @@ class MaterialController {
     }
     async getAllMaterial(req, res) {
         try{
-            const materials = await MaterialModel.findAll();
+            
+            const data = await sequelize.query(`SELECT b.quantity, a.id, a.name, a.price FROM public.materials as a FULL JOIN public.material_details as b ON a.id = b.material_id`)
             return res
                 .status(200)    
-                .json(materials);
+                .json(data[0]);
         } catch(error) {
             res.status(400).send({
                 message:error.message
@@ -106,6 +107,35 @@ class MaterialController {
                 .status(200)
                 .send({message:'Delete MATERIAL successfully!'})
         } catch(error) {
+            res.status(400).send({
+                message:error.message
+            })
+        }
+    }
+
+    async getMaterialFollowType(req, res) {
+        try{
+            const type_id = req.params.id;
+            const materials = await MaterialModel.findAll({
+                where: {material_type_id: type_id}
+            });
+            return res
+                .status(200)    
+                .json(materials);
+        } catch(error) {
+            res.status(400).send({
+                message:error.message
+            })
+        }
+    }
+
+    async getTypeMaterial(req, res) {
+        try {
+            const all_type = await MaterialTypeModel.findAll();
+            return res
+                .status(200)    
+                .json(all_type);
+        } catch (error) {
             res.status(400).send({
                 message:error.message
             })

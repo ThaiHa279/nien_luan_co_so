@@ -3,7 +3,6 @@ const DistributorModel = require('~/models/distributor.model');
 class DistributorController {
     async createDistributor(req, res) {
         try{
-            console.log(1);
             const name = req.body.name;
             const phone = req.body.phone;
             const address = req.body.address;

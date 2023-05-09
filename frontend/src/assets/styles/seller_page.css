@@ -15,9 +15,9 @@
     opacity: 0.5;
   }
 
-.ant-space-item{
-  width: 60%;
-}
 .ant-input-number .ant-input-number-input {
   vertical-align: baseline;
+}
+.page_print {
+  margin: 20px;
 }

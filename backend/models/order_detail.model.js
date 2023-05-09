@@ -15,16 +15,32 @@ const  OrderDetailsModel= sequelize.define(
             type: DataTypes.INTEGER,
             allowNull:false
         },
+        material_id: {
+            type: DataTypes.INTEGER,
+            references: {
+                model: MaterialModel,
+                key: 'id',
+            },
+            allowNull: false
+        },
+        order_id:{
+            type: DataTypes.INTEGER,
+            references: {
+                model: OrderModel,
+                key: 'id',
+            },
+            allowNull: false
+        }
     },
     { initialAutoIncrement: 1000, timestamps: true, paranoid: true }
 );
-MaterialModel.belongsToMany(OrderModel, {
-    through: OrderDetailsModel, 
-    foreignKey: "material_id"
-});
-OrderModel.belongsToMany(MaterialModel, {
-    through: OrderDetailsModel, 
-    foreignKey: "store_id"
-})
+// MaterialModel.belongsToMany(OrderModel, {
+//     through: OrderDetailsModel, 
+//     foreignKey: "material_id"
+// });
+// OrderModel.belongsToMany(MaterialModel, {
+//     through: OrderDetailsModel, 
+//     foreignKey: "order_id"
+// })
 
 module.exports = OrderDetailsModel;

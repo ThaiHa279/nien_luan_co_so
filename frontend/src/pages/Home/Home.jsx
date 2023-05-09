@@ -1,7 +1,11 @@
 import './Home.css'
-import { Breadcrumb, Layout, theme,  Button, Card , Space} from 'antd';
-import img_url from "../../assets/images/building-supplies-lumber.png";
+import { useEffect } from "react";
+import { Breadcrumb, Layout, theme, Card , Space, Image, Typography} from 'antd';
 import Header from '../../components/Header/Header'; 
+import {NavLink } from "react-router-dom";
+import { getTypeItems } from '../../redux/apiRequest';
+import { useDispatch, useSelector } from "react-redux";
+
 const {Meta} = Card
 const {Content, Footer } = Layout;
 const Home = () => {
@@ -9,6 +13,14 @@ const Home = () => {
     token: { colorBgContainer },
   } = theme.useToken();
 
+  const dispatch = useDispatch();
+
+  useEffect(()=> {
+    getTypeItems(dispatch);   
+  }, [])
+  
+  const type_items =  useSelector((state) => state.materials?.items.typeItems);
+  
   return (
     <Layout className="layout">
       <Header>
@@ -18,15 +30,6 @@ const Home = () => {
           padding: '0 50px',
         }}
       >
-        <Breadcrumb
-          style={{
-            margin: '16px 0',
-          }}
-        >
-          <Breadcrumb.Item>Home</Breadcrumb.Item>
-          <Breadcrumb.Item>List</Breadcrumb.Item>
-          <Breadcrumb.Item>App</Breadcrumb.Item>
-        </Breadcrumb>
         <div
           className="site-layout-content"
           style={{
@@ -34,23 +37,33 @@ const Home = () => {
           }}
         >
             <br />
+            <Image width={1350} src={require('../../assets/images/home.jpg')}></Image>
             <br />
-            <Space size={50}>
-            <Card
-              hoverable
-              style={{
-                width: 200,
-                border:'none',
-              }}
-              cover={
-                <img className='img' src={img_url}/>
-              }
+            <br />
+            <Space className='wrap_item' size={[7, 16]} wrap
+              style={{marginTop:30}}
             >
-              <Meta title="Lumber" style={{ textAlign:'center' }}/>
-            </Card>
-              <Button>Default</Button>
-              <Button type="dashed">Dashed</Button>
-              <Button type="link">Link</Button>
+              {
+                type_items?.map((type) => {
+                  const img_url = require(`../../assets/images/type/${type.name}.jpg`);
+                  return (
+                    <NavLink to='/item' state={{id: type.id}}>
+                      <Card
+                        style={{
+                          width: 200,
+                          border:'none',
+                        }}
+                        cover={
+                          <img className='img' src={img_url}/>
+                        }
+                      >
+                        <Meta title={type.name} style={{ textAlign:'center' }}/>
+                      </Card>
+                    </NavLink>
+                  )
+                })
+              }
+              
             </Space>
         </div>
       </Content>

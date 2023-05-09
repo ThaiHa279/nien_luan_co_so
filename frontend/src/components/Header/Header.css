@@ -7,7 +7,7 @@
   width: 120px;
   height: 31px;
   margin: 16px 24px 16px 0;
-  background: rgba(255, 255, 255, 0.3);
+  background: rgb(43, 162, 236);
 }
 .ant-row-rtl #components-layout-demo-top .logo {
   float: right;
@@ -16,4 +16,27 @@
 
 .img {
   border-radius: 50%;
+}
+.ant-layout-header {
+  display: flex;
+  justify-content: space-between;
+}
+.header-option {
+  color:rgba(255, 255, 255, 0.5) 
+}
+.header-nav {
+  width: 75%;
+}
+.logo span {
+  color: rgba(255, 255, 255);
+}
+.ant-dropdown-trigger {
+  color:rgba(255, 255, 255) 
+}
+.ant-menu-title-content a{
+  color: rgba(255, 255, 255);
+}
+
+.ant-layout-header {
+  background: rgb(9, 74, 115);
 }

@@ -12,11 +12,9 @@ const BillModel = sequelize.define(
             autoIncrement: true,
             primaryKey: true
         },
-        date: {
-            type: DataTypes.DATE, 
-            allowNull:false
-        }
+        
     },
+    
     { initialAutoIncrement: 1000, timestamps: true, paranoid: true }
 );
 
@@ -25,6 +23,9 @@ BillModel.belongsTo(UserModel, {
 });
 BillModel.belongsTo(UserModel, {
     foreignKey: "client_id",
+});
+BillModel.belongsTo(StoreModel, {
+    foreignKey: "store_id",
 });
 
 

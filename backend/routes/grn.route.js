@@ -5,7 +5,7 @@ const {
     getAllGRN,
 	updateGRN,
 	deleteGRN,
-} = require("~/controllers/GRN.controller")
+} = require("~/controllers/grn.controller")
 
 
 const router = Router();

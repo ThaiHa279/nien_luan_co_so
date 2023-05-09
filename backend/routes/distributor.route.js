@@ -5,7 +5,7 @@ const {
     getAllDistributor,
 	updateDistributor,
 	deleteDistributor,
-} = require("~/controllers/Distributor.controller")
+} = require("~/controllers/distributor.controller")
 
 
 const router = Router();

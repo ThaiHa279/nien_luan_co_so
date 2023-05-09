@@ -25,10 +25,6 @@ const UserModel = sequelize.define(
         phone: {
             type: DataTypes.STRING,
         },
-        admin:{
-            type: DataTypes.BOOLEAN,
-			defaultValue: false,
-        },
         staff:{
             type: DataTypes.BOOLEAN,
 			defaultValue: false,

@@ -1,6 +1,7 @@
 const { DataTypes } = require("sequelize");
 
-const sequelize = require("~/services/sequelize.service")
+const sequelize = require("~/services/sequelize.service");
+const UserModel = require("./user.model");
 
 const OrderModel = sequelize.define(
     "order",
@@ -10,12 +11,18 @@ const OrderModel = sequelize.define(
             autoIncrement: true,
             primaryKey: true
         },
-        date: {
-            type: DataTypes.DATE,
-            allowNull:false
+        payment: {
+            type: DataTypes.STRING, 
+            allowNull: false,
         },
+        delivery_to: {
+            type: DataTypes.STRING, 
+        }
     },
     { initialAutoIncrement: 1000, timestamps: true, paranoid: true }
 );
-
+OrderModel.belongsTo(UserModel, {
+    foreignKey: "user_id",
+    allowNull: false
+});
 module.exports =OrderModel ;

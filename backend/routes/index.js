@@ -19,7 +19,6 @@ router.use(
 
 router.use(
     "/distributor",
-    AuthMiddleware,
     require('./distributor.route')
 );
 
@@ -34,10 +33,13 @@ router.use(
     AuthMiddleware,
     require('./bill.route')
 );
-
+router.use(
+    "/grn",
+    AuthMiddleware,
+    require('./grn.route')
+);
 router.use(
     "/store",
-    AuthMiddleware,
     require('./store.route')
 );
 
@@ -45,6 +47,12 @@ router.use(
     "/distributor",
     AuthMiddleware,
     require('./distributor.route')
+);
+
+router.use(
+    "/statistic",
+    AuthMiddleware,
+    require('./statistic.route')
 );
 
 module.exports = router;

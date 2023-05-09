@@ -1,57 +1,65 @@
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
-import { Button, Form, Modal, Space, AutoComplete, InputNumber } from 'antd';
+import { Button, Form, Modal, Space, AutoComplete, InputNumber, Table, Tag } from 'antd';
 import ReactToPrint from 'react-to-print';
 import { useState, useRef} from 'react';
 import { useDispatch, useSelector } from "react-redux";
-import { nhaphang } from '../redux/apiRequest';
+import { ImportStore } from '../redux/apiRequest';
+import Typography from 'antd/es/typography/Typography';
 
 export const ImportComponet = () => {
-  const material = useSelector((state) => state.items?.items.allitems);
+  const material = useSelector((state) => state.materials?.items.allItems);
   const user = useSelector((state) => state.auth.login?.currentUser);
 
   const options = []
   material.map((i) => {
-    let value = {
+    let item = {
       value: i.name,
+      id: i.id
     }
-    options.push(value);
+    options.push(item);
     return i;
   })
-    
+  
+  const columns = [
+    {
+      title: 'Tên sản phẩm',
+      dataIndex: 'name',
+      key: 'name',
+      render: (text) => <a>{text}</a>,
+    },
+    {
+      title: 'Số lượng',
+      dataIndex: 'quantity',
+      key: 'quantity'
+    }, 
+    {
+      title: 'Đơn giá',
+      dataIndex: 'price',
+      key: 'price'
+    },
+  ]
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [items, setItems] = useState(Object);
   const showModal = () => {
     setIsModalOpen(true);
   };
 const handleOk = async() => {
-  const data = [];
-  await items.map((item)=> {  
-    for (let i = 0; i < material.length; i++) {
-      const element = material[i];
-      console.log(element);
-      if (element.name === item.item) {
-        let value = {
-          martirial_id: element.id,
-          store_id: user.store_id,
-          value: item.value,
-          option: "+",
-        }
-        data.push(value);
-      }
-    }
-    return item;
-  })
-  console.log(data);
-  await nhaphang(data,user.accessToken);
+  await ImportStore({items: items, staff_id: user.id, store_id: user.store_id},user.accessToken);
   setIsModalOpen(false);
 };
 const handleCancel = () => {
   setIsModalOpen(false);
 };
 const onFinish = (values) => {
-  console.log('Received values of form:', values);
-
-  setItems(values.users);
+  const data = values.users.map((item)=> {
+    return {
+      ...item,
+      id: material.find((m) => m.name === item.name).id
+    }
+  })
+  console.log('Received values of form:', data);
+  setItems(data);
   showModal();
 };
   const componentRef = useRef();
@@ -61,11 +69,11 @@ const onFinish = (values) => {
     name="dynamic_form_nest_item"
     onFinish={onFinish}
     style={{
-      maxWidth: 600,
+      maxWidth: 1000,
     }}
     autoComplete="off"
   >
-    <Form.List name="users">
+    <Form.List name="users" >
       {(fields, { add, remove }) => (
         <>
           {fields.map(({ key, name, ...restField }) => (
@@ -73,12 +81,14 @@ const onFinish = (values) => {
               key={key}
               style={{
                 marginBottom: 5,
+                // display:'flex',
               }}
               align="baseline"
             >
               <Form.Item
+                label="Tên mặt hàng"
                 {...restField}
-                name={[name, 'item']}
+                name={[name, 'name']}
                 rules={[
                   {
                     required: true,
@@ -92,21 +102,39 @@ const onFinish = (values) => {
                         }}
                         options={options}
                         placeholder="Sản phẩm"
-                        filterOption={(inputValue, option) =>
-                        option.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
+                        filterOption={ (inputValue, option) =>
+                          option.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
                         }
                     />  
               </Form.Item>
               <Form.Item
                 {...restField}
-                name={[name, 'value']}
+                label="Số lượng"
+                name={[name, 'quantity']}
                 rules={[
                   {
                     required: true,
                     message: 'Missing value',
                   },
                 ]}
-                initialValue={3}
+                initialValue={1}
+              >
+                <InputNumber style={{
+                  width: 100
+                }} 
+                min={1} max={100000}/>
+              </Form.Item>
+              <Form.Item
+                {...restField}
+                label="Giá"
+                name={[name, 'price']}
+                rules={[
+                  {
+                    required: true,
+                    message: 'Missing value',
+                  },
+                ]}
+                initialValue={10000}
               >
                 <InputNumber style={{
                   width: 100
@@ -117,29 +145,30 @@ const onFinish = (values) => {
             </Space>
           ))}
           <Form.Item>
-            <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+            <Button style={{width: '20%', marginRight: 30}} type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
               Add field
+            </Button>
+            <Button style={{width: '20%'}}  type="primary" htmlType="submit">
+              Submit
             </Button>
           </Form.Item>
         </>
       )}
     </Form.List>
-    <Form.Item>
-      <Button type="primary" htmlType="submit">
-        Submit
-      </Button>
-    </Form.Item>
   </Form> 
 
  {isModalOpen && <Modal title="Basic Modal" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
-    <div ref={componentRef}>
-    {
-      items?.map((item) => {
-        return (
-          <p> {item.item} : {item.value}</p>
-        )
-      })
-    }
+    <div className='page_print' ref={componentRef}>
+      <Typography.Title level={3} style={{margin: 'auto', width:'50%'}}>Phiếu nhập hàng</Typography.Title>
+      <br/>
+      <br/>
+      <Typography>Nhân viên: {user.name} </Typography>
+      <br/>
+      <Typography>Mã cửa hàng: {user.store_id}</Typography>
+      <br/>
+      <Table pagination={false} dataSource={items} columns={columns} />
+      <br/>
+      <Typography style={{marginLeft:'70%'}}>Xác nhận</Typography>
     </div>
     <ReactToPrint
           trigger={() => <Button type='primary'>Print this out!</Button>}

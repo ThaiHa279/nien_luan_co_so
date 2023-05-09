@@ -5,13 +5,32 @@ const BillDetailsModel = require('~/models/bill_detail.model');
 class BillController {
     async createBill(req, res) {
         try{
-            const date = NOW;
-   			await BillModel.create({
-                date,
-			});
+            var id = 0;
+            const staff_id = req.body.staff_id;
+            const items = req.body.items; 
+            const store_id = req.body.store_id;
+            const client_id = req.body.store_id;
+			await BillModel.create({
+                staff_id: staff_id,
+                store_id: store_id,
+                client_id: client_id
+			}).then(result => id = result.id);
+
+
+            await items.map(async(item) => {
+                await BillDetailsModel.create({
+                    material_id: item.id,
+                    quantity: item.quantity,
+                    price: item.price,
+                    bill_id: id
+                })
+            })
+            
 			return res
 				.status(200)
-				.json({ message: "Create BILL successfully!" });
+				.json({ 
+                    message: "Create Bill successfully!",
+                }); 
         } catch(error) {
             res.status(400).send({
                 message:error.message
