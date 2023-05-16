@@ -31,7 +31,7 @@ class OrderController {
 			return res
 				.status(200)
 				.json({ 
-                    message: "Create ORDER successfully!",
+                    message: "Order ID is " + String(id),
                 }); 
         } catch(error) {
             res.status(400).send({

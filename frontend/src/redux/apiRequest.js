@@ -131,10 +131,10 @@ export const orderItems = async(user_id, items, payment, delivery , accessToken)
         delivery_to: delivery,
     }
     try {
-        await axios.post("http://localhost:8080/api/v1/order", data, {
+        const id = await axios.post("http://localhost:8080/api/v1/order", data, {
             headers: {authorization: `Bearer ${accessToken}`}, 
         });
-        alert(`Đặt hàng thành công!`);
+        alert(id.data.message)
     } catch(err) {
         console.log(err);
     }

@@ -1,14 +1,33 @@
 import './Cart.css'
 import Header from "../../components/Header/Header";
 import { Typography } from 'antd';
-import { Input, Breadcrumb, Layout, theme,  Button, Card, InputNumber,Image, Modal,Select } from 'antd';
+import { Select, Space, Input, Table, Breadcrumb, Layout, theme,  Button, Card, InputNumber,Image, Modal } from 'antd';
 import { useDispatch, useSelector } from "react-redux";
 import { orderItems } from '../../redux/apiRequest';
 import { removeItems, changeQuantityItem } from '../../redux/cartSlice';
 import { useState } from 'react';
+import axios from 'axios';
 
 const {Content, Footer } = Layout;
 
+  const columns = [
+    {
+      title: 'Tên sản phẩm',
+      dataIndex: 'name',
+      key: 'name',
+      render: (text) => <a>{text}</a>,
+    },
+    {
+      title: 'Số lượng',
+      dataIndex: 'quantity',
+      key: 'quantity'
+    }, 
+    {
+      title: 'Đơn giá',
+      dataIndex: 'price',
+      key: 'price'
+    },
+  ]
 
 function Cart() {
   const [open, setOpen] = useState(false);
@@ -16,11 +35,59 @@ function Cart() {
   const [modalText, setModalText] = useState('Content of the modal');
   const [method, setMethod] = useState(1);
   const [delivery, setDelivery] = useState('');
+  const [commune, setCommune] = useState([]);
+  const [district, setDistrict] = useState([]);
+  const [province, setProvince] = useState([]);
+  const [communeSL, setCommuneSL] = useState('');
+  const [districtSL, setDistrictSL] = useState('');
+  const [provinceSL, setProvinceSL] = useState('');
+  const [address, setAddress] = useState([])
+  const getAllAddress = async() => {
+    try {
+        const data = await axios.get("https://provinces.open-api.vn/api/", { params: { depth: 3 } });
+        setAddress(data.data);
+        setProvince(data.data.map((province) => {
+          return ({
+            value: province.name,
+            label: province.name
+          })
+        }))
+    } catch(err) {
+        console.log(err);
+    }
+  }
+  const handleChangeProvince = (value) => {
+    setProvinceSL(value);
+    console.log(address);
+    const allDistrict = address.find((province) => province.name === value).districts
+    setDistrict(allDistrict.map((district) => {
+          return ({
+            value: district.name,
+            label: district.name
+          })
+        }))
+  }
+  const handleChangeDistrict = (value) => {
+    setDistrictSL(value);
+    const allCommune = address.find((province) => province.name === provinceSL).districts.find((district) => district.name === value).wards
+    setCommune(allCommune.map((commune) => {
+          return ({
+            value: commune.name,
+            label: commune.name
+          })
+        }))
+  }
+  const handleChangeCommune = (value) => {
+    setCommuneSL(value)
+  }
+
   const showModal = () => {
+    getAllAddress()
     setOpen(true);
   };
-  const handleOrder = () => {
-    orderItems(user.id, items, method ? "direct" : "card", delivery, user.accessToken);
+  const handleOrder = async() => {
+    const address = delivery+' ,'+communeSL+' ,'+districtSL+' ,'+provinceSL
+    orderItems(user.id, items, method ? "direct" : "card", address, user.accessToken);
   }
   const checkout = async () => {
     await fetch('http://localhost:8080/checkout', {
@@ -145,10 +212,21 @@ function Cart() {
         >
           {
             <>
+            <Typography.Title
+                  level={3}
+                  style={{
+                    margin: 'auto',
+                    width: '30%',
+                    marginBottom: '0.5rem'
+
+                  }}
+                >Đơn hàng</Typography.Title>
               <div>
-                {items.map((item) => {
+              <Table pagination={false} dataSource={items} columns={columns} />
+                {/* {items.map((item) => {
                   total += item.price*item.quantity;
                   return (
+                   
                     <div className='modal_item'>
                       <div>Tên sản phẩm: {item.name}</div>
                       <div>Số lượng: {item.quantity}</div>
@@ -160,7 +238,7 @@ function Cart() {
                       </div>
                     </div>
                   )
-                })}
+                })} */}
               </div>
               <div>
                 <Typography.Title
@@ -169,7 +247,33 @@ function Cart() {
                     marginBottom: 5,
                   }}
                 >Nhận hàng tại: </Typography.Title>
-                <Input placeholder="Nhập nơi nhận hàng" onChange={(e) => {setDelivery(e.target.value)}}/>;
+                <Space wrap style={{marginBottom: "0.5rem"}}>
+                  <Select
+                    style={{
+                      width: 150,
+                    }}
+                    placeholder={'Tỉnh/Thành phố'}
+                    onChange={handleChangeProvince}
+                    options={province}
+                  />
+                  <Select
+                    style={{
+                      width: 150,
+                    }}
+                    placeholder={'Huyện/Quận'}
+                    onChange={handleChangeDistrict}
+                    options={district}
+                  />
+                  <Select
+                    style={{
+                      width: 150,
+                    }}
+                    placeholder={'Xã/Phường'}
+                    onChange={handleChangeCommune}
+                    options={commune}
+                  />
+                  </Space>
+                  <Input placeholder="Địa chỉ chi tiết" onChange={(e) => {setDelivery(e.target.value)}}/>
                 <Typography.Title
                   level={5}
                   style={{
@@ -195,6 +299,9 @@ function Cart() {
                   ]}
                 />
               </div>
+              {items.map((item) => {
+                  total += item.price*item.quantity;
+              })}
               <Typography.Title
                 level={4}
                 style={{
